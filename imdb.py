@@ -3,36 +3,33 @@
 import requests
 from bs4 import BeautifulSoup
 
-movie_title_cs = 'h1'
-movie_poster_cs = '.poster img'
-movie_rating_cs = 'strong span'
-movie_genre_cs = '.subtext a'
-movie_cast_cs = '.primary_photo+ td a' 
 
-request_url = "https://www.imdb.com/title/tt4154796"
-response = requests.get(request_url)
-response_text = response.text  #<class 'str'>
-soup = BeautifulSoup(response_text) #換成soup type  <class 'bs4.BeautifulSoup'>
-print(type(soup))
+def get_moive_data(moive_url):
 
-moive_title_element_tag = soup.select(movie_title_cs)[0] #"similar to list" def soup tag
-moive_title =moive_title_element_tag.text
-print(moive_title)
-moive_poster_element_tag = soup.select(movie_poster_cs)[0]
-moive_poster = moive_poster_element_tag.get('src')
-print(moive_poster)
-moive_rating_element_tag = soup.select(movie_rating_cs)[0]
-moive_rating = float(moive_rating_element_tag.text)
-print(moive_rating)
-# for e in soup.select(movie_genre_cs):
-#     print(e.text)
+    movie_title_cs = 'h1'
+    movie_poster_cs = '.poster img'
+    movie_rating_cs = 'strong span'
+    movie_genre_cs = '.subtext a'
+    movie_cast_cs = '.primary_photo+ td a' 
+    response = requests.get(moive_url)
+    response_text = response.text  #<class 'str'>
+    soup = BeautifulSoup(response_text, "html.parser") #換成soup type  <class 'bs4.BeautifulSoup'> html段for移除警告
+    moive_title = soup.select(movie_title_cs)[0].text.replace('\xa0', ' ').strip()
+    moive_poster = soup.select(movie_poster_cs)[0].get('src')
+    moive_rating = float(soup.select(movie_rating_cs)[0].text)
+    moive_genre = [e.text for e in soup.select(movie_genre_cs)]
+    moive_release_date = moive_genre.pop()
+    moive_cast = [e.text.strip() for e in soup.select(movie_cast_cs)]
+    moive_data = {
+        'moiveTitle' : moive_title,
+        'moivePoster' : moive_poster,
+        'moiveRatinf' : moive_rating,
+        'moiveGenre' : moive_genre,
+        'moiveCast'    : moive_cast
+    }
+    return moive_data
 
-moive_genre = [e.text for e in soup.select(movie_genre_cs)]
-moive_release_date = moive_genre.pop()
-print(moive_genre)
-
-moive_cast = [e.text.strip() for e in soup.select(movie_cast_cs)]
-print(moive_cast)
+print(get_moive_data("https://www.imdb.com/title/tt7286456"))
 
 
 
